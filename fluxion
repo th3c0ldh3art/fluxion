@@ -61,6 +61,23 @@ general_exitmode_5="Restoring "$grey"tput"
 general_exitmode_6="Restarting "$grey"Network-Manager"
 general_exitmode_7="Cleanup performed successfully!"
 general_exitmode_8="Thanks for using fluxion"
+
+# If user knows which network interface to choose
+interface=''
+INTERFACE=`getopt -o i: --long interface: -- "$@"`
+eval set -- "$INTERFACE"
+
+# extract options and their arguments into variables.
+while [[ $# -gt 1 ]]
+do
+    case "$1" in
+        -i | --interface)
+            interface=$2 ; 
+            shift 2;
+            ;;
+        *)  exit 1 ;;
+    esac
+done
 ##############################################################################################
 
 # DEBUG MODE = 0 ; DEBUG MODE = 1 [Normal Mode / Developer Mode]
@@ -1367,61 +1384,67 @@ function setinterface {
 		airmon-ng stop $monkill >$flux_output_device
 		echo -n "$monkill, "
 	done
+	
+    # Create a variable with the list of physical network interfaces
+    readarray -t wirelessifaces < <(./airmon |grep "-" | cut -d- -f1)
+    INTERFACESNUMBER=`./airmon| grep -c "-"`
 
-	# Create a variable with the list of physical network interfaces
-	readarray -t wirelessifaces < <(./airmon |grep "-" | cut -d- -f1)
-	INTERFACESNUMBER=`./airmon| grep -c "-"`
 
+    if [ "$INTERFACESNUMBER" -gt "0" ]; then
+    # We know interface already, just assign it
+        if ! [[ $interface = '' ]]
+            then
+                PREWIFI=$interface
+    # else roll back to use from list
+        else
+	        echo $header_setinterface
+	        echo
+	        i=0
+	        for line in "${wirelessifaces[@]}"; do
+		        i=$(($i+1))
+		        wirelessifaces[$i]=$line
+		        echo -e "$blue ""$i)"$transparent" $line"
+	        done
+	        echo
+	        echo -n "#? "
+	        read line
+	        PREWIFI=$(echo ${wirelessifaces[$line]} | awk '{print $1}')
+	    fi
+	        # let user know, what interface we gonna use
+            echo "Interface [$PREWIFI]";
+		    if [ $(echo "$PREWIFI" | wc -m) -le 3 ]; then
+			    conditional_clear
+			    top
+			    setinterface
+		    fi
 
-	if [ "$INTERFACESNUMBER" -gt "0" ]; then
+		    readarray -t naggysoftware < <(./airmon check $PREWIFI | tail -n +8 | grep -v "on interface" | awk '{ print $2 }')
+		    WIFIDRIVER=$(./airmon | grep "$PREWIFI" | awk '{print($(NF-2))}')
 
-		echo $header_setinterface
-		echo
-		i=0
+		    if [ ! "$(echo $WIFIDRIVER | egrep 'rt2800|rt73')" ]; then
+		    rmmod -f "$WIFIDRIVER" &>$flux_output_device 2>&1
+		    fi
 
-		for line in "${wirelessifaces[@]}"; do
-			i=$(($i+1))
-			wirelessifaces[$i]=$line
-			echo -e "$blue ""$i)"$transparent" $line"
-		done
-		echo
-		echo -n "#? "
-		read line
-		PREWIFI=$(echo ${wirelessifaces[$line]} | awk '{print $1}')
+		    for nagger in "${naggysoftware[@]}"; do
+			    killall "$nagger" &>$flux_output_device
+		    done
+		    sleep 0.5
 
-		if [ $(echo "$PREWIFI" | wc -m) -le 3 ]; then
-			conditional_clear
-			top
-			setinterface
-		fi
+		    if [ ! "$(echo $WIFIDRIVER | egrep 'rt2800|rt73')" ]; then
+		    modprobe "$WIFIDRIVER" &>$flux_output_device 2>&1
+		    sleep 0.5
+		    fi
 
-		readarray -t naggysoftware < <(./airmon check $PREWIFI | tail -n +8 | grep -v "on interface" | awk '{ print $2 }')
-		WIFIDRIVER=$(./airmon | grep "$PREWIFI" | awk '{print($(NF-2))}')
+		    # Select Wifi Interface
+		    select PREWIFI in $INTERFACES; do
+			    break;
+		    done
 
-		if [ ! "$(echo $WIFIDRIVER | egrep 'rt2800|rt73')" ]; then
-		rmmod -f "$WIFIDRIVER" &>$flux_output_device 2>&1
-		fi
+		    WIFIMONITOR=$(./airmon start $PREWIFI | grep "enabled on" | cut -d " " -f 5 | cut -d ")" -f 1)
+		    WIFI_MONITOR=$WIFIMONITOR
+		    WIFI=$PREWIFI
 
-		for nagger in "${naggysoftware[@]}"; do
-			killall "$nagger" &>$flux_output_device
-		done
-		sleep 0.5
-
-		if [ ! "$(echo $WIFIDRIVER | egrep 'rt2800|rt73')" ]; then
-		modprobe "$WIFIDRIVER" &>$flux_output_device 2>&1
-		sleep 0.5
-		fi
-
-		# Select Wifi Interface
-		select PREWIFI in $INTERFACES; do
-			break;
-		done
-
-		WIFIMONITOR=$(./airmon start $PREWIFI | grep "enabled on" | cut -d " " -f 5 | cut -d ")" -f 1)
-		WIFI_MONITOR=$WIFIMONITOR
-		WIFI=$PREWIFI
-
-		#No wireless cards
+    #No wireless cards
 	else
 
 		echo $setinterface_error
