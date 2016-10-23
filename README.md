@@ -1,8 +1,8 @@
 #All credits to deltaxflux
 
-fore more refer here
+for more refer [here] (https://github.com/deltaxflux/fluxion) for his original work.
 
-https://github.com/deltaxflux/fluxion for his original work.
+#Change log in this version
 [+] added support for passing interface from command line
 
 #Fluxion is the future
