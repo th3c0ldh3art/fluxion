@@ -3,7 +3,8 @@
 For more, please refer [here] (https://github.com/deltaxflux/fluxion) for deltaxflux's original work.
 
 #Change log in this version
-[+] added support desktop icon for quick access\n
+[+] added support desktop icon for quick access
+
 [+] added support for passing interface from command line
 
 #Fluxion is the future
