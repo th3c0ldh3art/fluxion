@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=0.23
+Name=Fluxion
+Comment=Fluxion is the Future.
+Exec=sh -c './fluxion'
+Icon=fluxion.xpm
+Terminal=true
+Categories=NetworkExploitation;
+
