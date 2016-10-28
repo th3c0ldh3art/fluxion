@@ -1,6 +1,6 @@
 #All credits to deltaxflux
 
-For more, please refer [here] (https://github.com/deltaxflux/fluxion) for deltaxflux's original work.
+For more, please refer [here] (https://github.com/deltaxflux/fluxion) for his original work.
 
 #Change log in this version
 
