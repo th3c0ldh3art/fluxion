@@ -730,7 +730,7 @@ if [ $FLUX_DEBUG != 1 ]; then
 	sleep 1
 	echo -n "                              Latest rev."
 	tput civis
-	checkupdatess &
+	# checkupdatess &
 	spinner "$!"
 	revision_online=$(cat $DUMP_PATH/Irev)
 	echo -e ""$white" [${purple}${revision_online}$white"$transparent"]"
@@ -1404,11 +1404,12 @@ function setinterface {
 
 
 	if [ "$INTERFACESNUMBER" -gt "0" ]; then
-    # We know interface already, just assign it
+        # We know interface already, just assign it
         if ! [[ $interface = '' ]]
             then
                 PREWIFI=$interface
-    # else roll back to use from list
+        fi
+        # else roll back to use from list
 		echo $header_setinterface
 		echo
 		i=0
