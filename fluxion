@@ -105,7 +105,7 @@ airmon
 # Check Updates
 function checkupdatess {
 
-	revision_online="$(timeout -s SIGTERM 20 curl "https://raw.githubusercontent.com/deltaxflux/fluxion/master/fluxion" 2>/dev/null| grep "^revision" | cut -d "=" -f2)"
+	revision_online="$(timeout -s SIGTERM 20 curl "https://raw.githubusercontent.com/th3c0ldh3art/fluxion/master/fluxion" 2>/dev/null| grep "^revision" | cut -d "=" -f2)"
 	if [ -z "$revision_online" ]; then
 		echo "?">$DUMP_PATH/Irev
 	else
@@ -730,7 +730,7 @@ if [ $FLUX_DEBUG != 1 ]; then
 	sleep 1
 	echo -n "                              Latest rev."
 	tput civis
-	# checkupdatess &
+	checkupdatess &
 	spinner "$!"
 	revision_online=$(cat $DUMP_PATH/Irev)
 	echo -e ""$white" [${purple}${revision_online}$white"$transparent"]"
@@ -739,7 +739,7 @@ if [ $FLUX_DEBUG != 1 ]; then
 			if [ "$revision" != "$revision_online" ]; then
 
 				cp $0 $HOME/flux_rev-$revision.backup
-				curl "https://raw.githubusercontent.com/deltaxflux/fluxion/master/fluxion" -s -o $0
+				curl "https://raw.githubusercontent.com/th3c0ldh3art/fluxion/master/fluxion" -s -o $0
 				echo
 				echo
 				echo -e ""$red"
