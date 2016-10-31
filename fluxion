@@ -1408,28 +1408,27 @@ function setinterface {
         if ! [[ $interface = '' ]]
             then
                 PREWIFI=$interface
+        else
+            # else roll back to use from list
+		    echo $header_setinterface
+		    echo
+		    i=0
+
+		    for line in "${wirelessifaces[@]}"; do
+			    i=$(($i+1))
+			    wirelessifaces[$i]=$line
+			    echo -e "      "$red"["$yellow"$i"$red"]"$transparent" $line"
+		    done
+		    echo
+		    echo -n -e ""$red"["$blue"root"$yellow"@"$white"fluxion"$red"]-["$yellow"~"$red"]"$transparent""
+		    read line
+		    PREWIFI=$(echo ${wirelessifaces[$line]} | awk '{print $1}')
         fi
-        # else roll back to use from list
-		echo $header_setinterface
-		echo
-		i=0
-
-		for line in "${wirelessifaces[@]}"; do
-			i=$(($i+1))
-			wirelessifaces[$i]=$line
-			echo -e "      "$red"["$yellow"$i"$red"]"$transparent" $line"
-		done
-		echo
-		echo -n -e ""$red"["$blue"root"$yellow"@"$white"fluxion"$red"]-["$yellow"~"$red"]"$transparent""
-		read line
-		PREWIFI=$(echo ${wirelessifaces[$line]} | awk '{print $1}')
-
 		if [ $(echo "$PREWIFI" | wc -m) -le 3 ]; then
 			conditional_clear
 			top
 			setinterface
 		fi
-
 		readarray -t naggysoftware < <(./airmon check $PREWIFI | tail -n +8 | grep -v "on interface" | awk '{ print $2 }')
 		WIFIDRIVER=$(./airmon | grep "$PREWIFI" | awk '{print($(NF-2))}')
 
